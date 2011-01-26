@@ -46,8 +46,6 @@ docs = <<-DOCS
 Run the following commands to complete the setup of #{app_name.humanize}:
 
 % cd #{app_name}
-% mysql_new #{app_name}_dev
-% mysql_new #{app_name}_test
 % bundle install
 % rails generate rspec:install
 
