@@ -1,8 +1,14 @@
 rvmrc = <<-RVMRC
-rvm gemset use #{app_name}
+if [[ -n "$rvm_path/environments" && -s "$rvm_path/environments/ruby-1.8.7-p302@#{app_name}" ]] ; then
+  \. "$rvm_path/environments/ruby-1.8.7-p302@#{app_name}"
+else
+  rvm --create use  "ruby-1.8.7-p302@#{app_name}"
+fi
 RVMRC
 
 create_file ".rvmrc", rvmrc
+username = ask("What is the db user name?")
+password = ask("What is the db password?")
 
 gem "factory_girl_rails", ">= 1.0.0", :group => :test
 gem "factory_girl_generator", ">= 0.0.1", :group => [:development, :test]
@@ -24,6 +30,11 @@ get "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.5/jquery-ui.min.js", "pub
 
 gsub_file 'config/application.rb', 'config.action_view.javascript_expansions[:defaults] = %w()', 'config.action_view.javascript_expansions[:defaults] = %w(jquery.js jquery-ui.js rails.js)'
 
+gsub_file 'config/database.yml', 'username: root', "username: #{username}"
+gsub_file 'config/database.yml', 'password:', "password: #{password}"
+
+remove_file "public/index.html"
+
 create_file "log/.gitkeep"
 create_file "tmp/.gitkeep"
 
@@ -34,11 +45,11 @@ docs = <<-DOCS
 
 Run the following commands to complete the setup of #{app_name.humanize}:
 
-% rvm gemset create #{app_name}
 % cd #{app_name}
-% gem install bundler
+% mysql_new #{app_name}_dev
+% mysql_new #{app_name}_test
 % bundle install
-% script/rails generate rspec:install
+% rails generate rspec:install
 
 DOCS
 
